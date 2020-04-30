@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Dispositivos Moveis Estacio",
-    "slug": "dm",
+    "name": "Tasklist",
+    "slug": "tasklist",
     "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",

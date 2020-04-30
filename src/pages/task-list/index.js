@@ -1,55 +1,48 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { View, FlatList, Alert, TouchableHighlight } from 'react-native'
-import { Searchbar, List, FAB } from 'react-native-paper'
+import { View, FlatList, Alert } from 'react-native'
+import { FAB, Searchbar, List } from 'react-native-paper'
 import { API_URL } from '../../config'
 
-export default function TaskList(props) {
+function TaskList(props) {
   const [data, setData] = useState([])
-  const [loading, setLoading] = useState(false)
   const { navigation } = props
 
-  useEffect(() => {
-    getTasks()
-  }, [])
-
-  function getTasks() {
-    setLoading(true)
+  function getTaks() {
     axios
       .get(`${API_URL}/tasks.json`)
       .then((res) => {
         if (res.data) {
-          const entries = Object.entries(res.data).map((e) => {
-            return { id: e[0], ...e[1] }
+          const datalist = Object.entries(res.data).map((e) => {
+            return { ...e[1], id: e[0] }
           })
-          setData(entries)
+          setData(datalist)
         } else setData([])
       })
-      .catch((err) => Alert.alert('Erro...', 'Erro ao listar as tarefas.'))
-      .finally(() => setLoading(false))
+      .catch((err) => {
+        console.log(err)
+        Alert.alert('erro...', 'Erro ao carregar as tarefas.')
+      })
   }
 
   function delTask(id) {
     Alert.alert(
-      'Confirmação...',
-      'Deseja realmente excluir essa tarefa?',
+      'confirmação...',
+      'Deseja realmente excluir esta tarefa?',
       [
         { text: 'Cancelar' },
         {
           text: 'OK',
           onPress: () => {
-            setLoading(true)
             axios
               .delete(`${API_URL}/tasks/${id}.json`)
-              .then((res) =>
-                Alert.alert('Info...', 'Tarefa excluída com sucesso.')
-              )
-              .catch((err) =>
-                Alert.alert('Erro...', 'Erro ao listar as tarefas.')
-              )
-              .finally(() => {
-                setLoading(false)
-                getTasks()
+              .then((res) => {
+                getTaks()
+                Alert.alert('info...', 'Tarefa excluída com sucesso.')
+              })
+              .catch((err) => {
+                console.log(err)
+                Alert.alert('erro...', 'Erro ao excluir a tarefa.')
               })
           },
         },
@@ -58,30 +51,52 @@ export default function TaskList(props) {
     )
   }
 
+  function updatetask(obj) {
+    axios
+      .put(`${API_URL}/tasks/${obj.id}.json`, {
+        done: true,
+        title: obj.title,
+        description: obj.description,
+      })
+      .then((res) => {
+        getTaks()
+        Alert.alert('info...', 'Tarefa finalizada com sucesso.')
+      })
+      .catch((err) => {
+        console.log(err)
+        Alert.alert('erro...', 'Erro ao finalizar a tarefa.')
+      })
+  }
+
+  useEffect(() => {
+    getTaks()
+  }, [])
+
   return (
     <View style={{ flex: 1 }}>
-      <Searchbar placeholder='Search' onChangeText={(text) => null} />
+      <Searchbar style={{ margin: 10 }} />
       <FlatList
         data={data}
+        refreshing={false}
         renderItem={({ item }) => (
-          <>
-            <List.Item
-              title={item.title}
-              description={item.description}
-              onPress={() => Alert.alert('info...', 'info aqui')}
-              onLongPress={() => delTask(item.id)}
-              left={(props) => (
-                <List.Icon
-                  {...props}
-                  icon={item.done ? 'check' : 'border-none-variant'}
-                />
-              )}
-            />
-          </>
+          <List.Item
+            title={item.title}
+            description={`${item.description} - ${
+              item.done ? 'Finalizado' : 'Ativo'
+            }`}
+            onPress={() => delTask(item.id)}
+            right={(props) => (
+              <FAB
+                icon='check'
+                small
+                onPress={() => updatetask(item)}
+                style={{ margin: 5 }}
+              />
+            )}
+          />
         )}
         keyExtractor={(item) => item.id}
-        refreshing={loading}
-        onRefresh={() => getTasks()}
+        onRefresh={() => getTaks()}
       />
       <FAB
         style={{ position: 'absolute', margin: 16, right: 0, bottom: 0 }}
@@ -91,3 +106,5 @@ export default function TaskList(props) {
     </View>
   )
 }
+
+export default TaskList

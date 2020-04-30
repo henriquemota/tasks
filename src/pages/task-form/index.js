@@ -1,45 +1,63 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 import { View, Alert } from 'react-native'
 import { TextInput, Button } from 'react-native-paper'
 import { API_URL } from '../../config'
 
-export default function TaskForm(props) {
-  const initialState = { title: '', description: '', done: false }
-  const [data, setData] = useState(initialState)
+function TaskForm(props) {
+  const [data, setData] = useState({ title: '', description: '', done: false })
+  const [loading, setLoading] = useState(false)
+  const { navigation } = props
 
   function saveTask() {
-    axios
-      .post(`${API_URL}/tasks.json`, data)
-      .then((res) => {
-        Alert.alert('Sucesso...', 'Dados gravados com sucesso.')
-        setData(initialState)
-      })
-      .catch((err) => Alert.alert('Erro...', 'Erro ao gravar os dados.'))
+    if (data.title.trim().length > 0 && data.description.trim().length > 0) {
+      setLoading(true)
+      axios
+        .post(`${API_URL}/tasks.json`, data)
+        .then((res) => {
+          console.log(res.data)
+          Alert.alert('info...', 'Tarefa gravada com sucesso.')
+          navigation.goBack()
+        })
+        .catch((err) => {
+          console.log(err)
+          Alert.alert('erro...', 'Erro ao gravar a tarefa.')
+        })
+        .finally(() => setLoading(false))
+    } else Alert.alert('info...', 'Os campos são requeridos.')
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={{ flex: 1 }}>
       <TextInput
-        style={{ margin: 5 }}
-        mode='outlined'
-        placeholder='Título'
         value={data.title}
+        mode='outlined'
+        placeholder='título'
+        style={{ margin: 10 }}
         onChangeText={(text) => setData({ ...data, title: text })}
       />
       <TextInput
-        style={{ margin: 5, height: 200 }}
-        textAlignVertical={true}
+        value={data.description}
         mode='outlined'
+        placeholder='descrição'
         multiline={true}
         numberOfLines={10}
-        placeholder='Descrição'
-        value={data.description}
+        style={{
+          margin: 10,
+          height: 200,
+        }}
         onChangeText={(text) => setData({ ...data, description: text })}
       />
-      <Button style={{ margin: 5 }} mode='contained' onPress={saveTask}>
+      <Button
+        loading={loading}
+        mode='contained'
+        style={{ margin: 10 }}
+        onPress={saveTask}
+      >
         Gravar
       </Button>
     </View>
   )
 }
+
+export default TaskForm

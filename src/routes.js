@@ -19,7 +19,7 @@ export default function Routes() {
         <AppStack.Screen
           name='taskForm'
           component={TaskForm}
-          options={{ title: 'Form de tarefas' }}
+          options={{ title: 'Formulário tarefas' }}
         />
       </AppStack.Navigator>
     </NavigationContainer>
