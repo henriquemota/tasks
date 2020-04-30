@@ -1,3 +1,3 @@
-# APP Mapas
+# APP Tasks
 
-projeto de mapas e marcadores da disciplina de dispositivos móveis da Estácio
+projeto de integracao com firebase da disciplina de dispositivos móveis da Estácio
